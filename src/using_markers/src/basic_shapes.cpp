@@ -53,6 +53,8 @@ int main( int argc, char** argv )
     marker.color.b = 0.0f;
     marker.color.a = 1.0;
 
+    marker.text = "Hello Robot World!";
+
     marker.lifetime = ros::Duration();
 
     // Publish the marker
@@ -67,6 +69,8 @@ int main( int argc, char** argv )
     }
     marker_pub.publish(marker);
 
+    //ROS_INFO("[Marker] The text is [%s]\n", marker.text.c_str());// msg->data.c_str());    
+
     // Cycle between different shapes
     switch (shape)
     {
@@ -80,8 +84,11 @@ int main( int argc, char** argv )
       shape = visualization_msgs::Marker::CYLINDER;
       break;
     case visualization_msgs::Marker::CYLINDER:
-      shape = visualization_msgs::Marker::CUBE;
+      shape = visualization_msgs::Marker::TEXT_VIEW_FACING;
       break;
+    case visualization_msgs::Marker::TEXT_VIEW_FACING:
+      shape = visualization_msgs::Marker::CUBE;
+      break;  
     }
 
     r.sleep();
