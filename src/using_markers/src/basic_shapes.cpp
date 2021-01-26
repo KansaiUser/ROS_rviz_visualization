@@ -4,6 +4,10 @@
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <sensor_msgs/Image.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 int main( int argc, char** argv )
 {
@@ -11,6 +15,8 @@ int main( int argc, char** argv )
   ros::NodeHandle n;
   ros::Rate r(1);
   ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+
+  ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
 
   // Set our initial shape type to be a cube
   uint32_t shape = visualization_msgs::Marker::CUBE;
@@ -57,6 +63,33 @@ int main( int argc, char** argv )
 
     marker.lifetime = ros::Duration();
 
+    sensor_msgs::Image image;
+
+//
+ /*   ros::Time timeNow = ros::Time::now();
+    std::string frame = "camera";
+
+    image.header.stamp = timeNow;
+    image.header.frame_id = frame;
+
+    // Fill the left image message
+    sensor_msgs::fillImage( image,
+                            sensor_msgs::image_encodings::MONO8,
+                            240, // height
+                            320, // width
+                            320, // stepSize
+                            pFrameData->leftData);
+
+
+    sensor_msgs::clearImage(image);
+   */ 
+//
+    cv_bridge::CvImage cv_image;
+    cv_image.image = cv::imread("/root/test_dir/Test.png",CV_LOAD_IMAGE_COLOR);
+    cv_image.encoding = "bgr8";
+    //sensor_msgs::Image ros_image;
+    cv_image.toImageMsg(image);
+//
     // Publish the marker
     while (marker_pub.getNumSubscribers() < 1)
     {
@@ -68,6 +101,8 @@ int main( int argc, char** argv )
       sleep(1);
     }
     marker_pub.publish(marker);
+
+    image_pub.publish(image);
 
     //ROS_INFO("[Marker] The text is [%s]\n", marker.text.c_str());// msg->data.c_str());    
 
