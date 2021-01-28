@@ -28,12 +28,22 @@ int found_elements = 2;  //Here we simulate we have "found" two elements
 
 std::vector<bool> doShow;
 
+struct bbox{
+    int x0;
+    int y0;
+    int x1;
+    int y1;
+};
+
+std::vector<bbox> bboxes;
+
 MenuHandler menu_handler;
 MenuHandler::EntryHandle h_mode_last;
 
 //visualization_msgs::Marker marker;
 sensor_msgs::Image image;
 
+cv_bridge::CvImage cv_image;
 
 void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
@@ -65,14 +75,18 @@ void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
   server->applyChanges();
 
 }
-
+void apply_recognition()
+{
+   cv::rectangle(cv_image.image,cv::Point(300,300),cv::Point(500,500),cv::Scalar(0, 255, 0),5,8 );
+   cv_image.toImageMsg(image);
+}
 void makeImage()
 {
-    cv_bridge::CvImage cv_image;
+    //cv_bridge::CvImage cv_image;
     cv_image.image = cv::imread("/root/test_dir/two_pedestrian.jpeg",CV_LOAD_IMAGE_COLOR);
     cv_image.encoding = "bgr8";
     //sensor_msgs::Image ros_image;
-    cv_image.toImageMsg(image);
+    //cv_image.toImageMsg(image);
 }
 
 void makeMenuMarker( std::string name )
@@ -130,10 +144,16 @@ int main(int argc, char** argv)
 
   ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
 
+  
+
   for(int i=0;i<found_elements;i++){
       doShow.push_back(true);
+      
   }
-
+  bbox b1={305,305,533,701};
+  bbox b2={804,317,1079,716};
+  bboxes.push_back(b1);
+  bboxes.push_back(b2);
 
   initMenu();  //First we initiate the shape of the menu on the menu_handler
 
@@ -141,6 +161,7 @@ int main(int argc, char** argv)
 
   makeImage();
 
+  apply_recognition();
 
   // we apply the menu hander on the server 
   menu_handler.apply( *server, "Image" );
