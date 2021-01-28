@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   image_transport
   interactive_markers
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -163,7 +164,8 @@ target_link_libraries(points_and_lines ${catkin_LIBRARIES})
 add_executable(simple_marker src/simple_marker.cpp)
 target_link_libraries(simple_marker  ${catkin_LIBRARIES})
 
-
+add_executable(menu src/menu.cpp)
+target_link_libraries(menu  ${catkin_LIBRARIES})
 
 #############
 ## Install ##
