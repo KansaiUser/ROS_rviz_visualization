@@ -45,12 +45,24 @@ sensor_msgs::Image image;
 
 cv_bridge::CvImage cv_image;
 
+//ros::Publisher image_pub;
+
+void apply_recognition()
+{
+   //cv::rectangle(cv_image.image,cv::Point(300,300),cv::Point(500,500),cv::Scalar(0, 255, 0),5,8 );
+   for(int i=0; i< found_elements;i++){
+       if(doShow[i])
+         cv::rectangle(cv_image.image,cv::Point(bboxes[i].x0,bboxes[i].y0),
+                       cv::Point(bboxes[i].x1,bboxes[i].y1),cv::Scalar(0, 255, 0),5,8 );
+
+   }
+   
+   
+   cv_image.toImageMsg(image);
+}
+
 void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
-  //menu_handler.setCheckState( h_mode_last, MenuHandler::UNCHECKED );
-  //h_mode_last = feedback->menu_entry_id;  // here we got the number of the element to show (-1)
-  //menu_handler.setCheckState( h_mode_last, MenuHandler::CHECKED );
-
   MenuHandler::EntryHandle handle = feedback->menu_entry_id; // here we got the number of the element to show (-1)
   MenuHandler::CheckState state;
   menu_handler.getCheckState( handle, state );
@@ -74,12 +86,11 @@ void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
   menu_handler.reApply( *server );
   server->applyChanges();
 
+//  apply_recognition();
+  //image_pub.publish(image);
+
 }
-void apply_recognition()
-{
-   cv::rectangle(cv_image.image,cv::Point(300,300),cv::Point(500,500),cv::Scalar(0, 255, 0),5,8 );
-   cv_image.toImageMsg(image);
-}
+
 void makeImage()
 {
     //cv_bridge::CvImage cv_image;
@@ -143,7 +154,7 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
 
   ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
-
+  // image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
   
 
   for(int i=0;i<found_elements;i++){
