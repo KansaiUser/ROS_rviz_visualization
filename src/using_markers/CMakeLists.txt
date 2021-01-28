@@ -167,6 +167,9 @@ target_link_libraries(simple_marker  ${catkin_LIBRARIES})
 add_executable(menu src/menu.cpp)
 target_link_libraries(menu  ${catkin_LIBRARIES})
 
+add_executable(image_menu src/image_menu.cpp)
+target_link_libraries(image_menu  ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############
