@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   std_msgs
   image_transport
+  interactive_markers
 )
 
 ## System dependencies are found with CMake's conventions
@@ -158,6 +159,11 @@ target_link_libraries(basic_shapes ${catkin_LIBRARIES})
 
 add_executable(points_and_lines src/points_and_lines.cpp)
 target_link_libraries(points_and_lines ${catkin_LIBRARIES})
+
+add_executable(simple_marker src/simple_marker.cpp)
+target_link_libraries(simple_marker  ${catkin_LIBRARIES})
+
+
 
 #############
 ## Install ##
