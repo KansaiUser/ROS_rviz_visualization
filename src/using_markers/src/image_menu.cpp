@@ -17,12 +17,16 @@
 
 #include <math.h>
 
+#include <vector>
+
 using namespace visualization_msgs;
 using namespace interactive_markers;
 
 boost::shared_ptr<InteractiveMarkerServer> server;
 //float marker_pos = 0;
 int found_elements = 2;  //Here we simulate we have "found" two elements
+
+std::vector<bool> doShow;
 
 MenuHandler menu_handler;
 MenuHandler::EntryHandle h_mode_last;
@@ -33,7 +37,32 @@ sensor_msgs::Image image;
 
 void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
-  ROS_INFO("modeCb called.");
+  //menu_handler.setCheckState( h_mode_last, MenuHandler::UNCHECKED );
+  //h_mode_last = feedback->menu_entry_id;  // here we got the number of the element to show (-1)
+  //menu_handler.setCheckState( h_mode_last, MenuHandler::CHECKED );
+
+  MenuHandler::EntryHandle handle = feedback->menu_entry_id; // here we got the number of the element to show (-1)
+  MenuHandler::CheckState state;
+  menu_handler.getCheckState( handle, state );
+
+  ROS_INFO("Switching to menu entry #%d", handle);
+
+   if ( state == MenuHandler::CHECKED )
+   {
+     ROS_INFO(" Hiding");
+     doShow[handle] = false;
+     menu_handler.setCheckState( handle, MenuHandler::UNCHECKED );
+   }
+   else
+   {
+     ROS_INFO(" Showing");
+     doShow[handle] = true;
+     menu_handler.setCheckState( handle, MenuHandler::CHECKED );
+   }
+   
+
+  menu_handler.reApply( *server );
+  server->applyChanges();
 
 }
 
@@ -100,6 +129,10 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
 
   ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
+
+  for(int i=0;i<found_elements;i++){
+      doShow.push_back(true);
+  }
 
 
   initMenu();  //First we initiate the shape of the menu on the menu_handler
