@@ -40,7 +40,7 @@ void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
 void makeImage()
 {
     cv_bridge::CvImage cv_image;
-    cv_image.image = cv::imread("/root/test_dir/Test.png",CV_LOAD_IMAGE_COLOR);
+    cv_image.image = cv::imread("/root/test_dir/two_pedestrian.jpeg",CV_LOAD_IMAGE_COLOR);
     cv_image.encoding = "bgr8";
     //sensor_msgs::Image ros_image;
     cv_image.toImageMsg(image);
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
   server.reset( new InteractiveMarkerServer("image_menu","",false) );  //take ownership of the marker
 
   ros::NodeHandle n;
-  
+
   ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
 
 
