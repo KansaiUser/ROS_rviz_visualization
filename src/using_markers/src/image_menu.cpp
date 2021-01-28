@@ -27,11 +27,23 @@ int found_elements = 2;  //Here we simulate we have "found" two elements
 MenuHandler menu_handler;
 MenuHandler::EntryHandle h_mode_last;
 
+//visualization_msgs::Marker marker;
+sensor_msgs::Image image;
+
 
 void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
   ROS_INFO("modeCb called.");
 
+}
+
+void makeImage()
+{
+    cv_bridge::CvImage cv_image;
+    cv_image.image = cv::imread("/root/test_dir/Test.png",CV_LOAD_IMAGE_COLOR);
+    cv_image.encoding = "bgr8";
+    //sensor_msgs::Image ros_image;
+    cv_image.toImageMsg(image);
 }
 
 void makeMenuMarker( std::string name )
@@ -85,14 +97,34 @@ int main(int argc, char** argv)
 
   server.reset( new InteractiveMarkerServer("image_menu","",false) );  //take ownership of the marker
 
+  ros::NodeHandle n;
+  
+  ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
+
+
   initMenu();  //First we initiate the shape of the menu on the menu_handler
 
   makeMenuMarker("Image" );
+
+  makeImage();
+
 
   // we apply the menu hander on the server 
   menu_handler.apply( *server, "Image" );
 
   server->applyChanges();
+
+    while (image_pub.getNumSubscribers() < 1)
+    {
+      if (!ros::ok())
+      {
+        return 0;
+      }
+      ROS_WARN_ONCE("Please create a subscriber to the image");
+      sleep(1);
+    }
+   
+    image_pub.publish(image);
 
   ros::spin();
 
