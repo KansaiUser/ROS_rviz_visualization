@@ -45,16 +45,28 @@ sensor_msgs::Image image;
 
 cv_bridge::CvImage cv_image;
 
-//ros::Publisher image_pub;
+cv::Mat original; 
+
+ros::Publisher image_pub;
 
 void apply_recognition()
 {
    //cv::rectangle(cv_image.image,cv::Point(300,300),cv::Point(500,500),cv::Scalar(0, 255, 0),5,8 );
+   //cv_image.image = original;
+
+  cv::Mat cloned_im= original.clone();
+    cv_image.image = cloned_im;
+
    for(int i=0; i< found_elements;i++){
-       if(doShow[i])
+      // ROS_INFO(" doShow #%d is %d",i,doShow[i]);
+       if(doShow[i]){
+           ROS_INFO(" doShow #%d is true",i);
          cv::rectangle(cv_image.image,cv::Point(bboxes[i].x0,bboxes[i].y0),
                        cv::Point(bboxes[i].x1,bboxes[i].y1),cv::Scalar(0, 255, 0),5,8 );
-
+       }
+       else{
+           ROS_INFO(" doShow #%d is false",i);
+       }
    }
    
    
@@ -67,18 +79,18 @@ void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
   MenuHandler::CheckState state;
   menu_handler.getCheckState( handle, state );
 
-  ROS_INFO("Switching to menu entry #%d", handle);
+  //ROS_INFO("Switching to menu entry #%d", handle);
 
    if ( state == MenuHandler::CHECKED )
    {
-     ROS_INFO(" Hiding");
-     doShow[handle] = false;
+     ROS_INFO(" Hiding %d ",handle);
+     doShow[handle-2] = false;
      menu_handler.setCheckState( handle, MenuHandler::UNCHECKED );
    }
    else
    {
-     ROS_INFO(" Showing");
-     doShow[handle] = true;
+     ROS_INFO(" Showing %d ",handle);
+     doShow[handle-2] = true;
      menu_handler.setCheckState( handle, MenuHandler::CHECKED );
    }
    
@@ -86,15 +98,16 @@ void modeCb( const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
   menu_handler.reApply( *server );
   server->applyChanges();
 
-//  apply_recognition();
-  //image_pub.publish(image);
+  apply_recognition();
+  image_pub.publish(image);
 
 }
 
 void makeImage()
 {
     //cv_bridge::CvImage cv_image;
-    cv_image.image = cv::imread("/root/test_dir/two_pedestrian.jpeg",CV_LOAD_IMAGE_COLOR);
+    //cv_image.image = cv::imread("/root/test_dir/two_pedestrian.jpeg",CV_LOAD_IMAGE_COLOR);
+    original = cv::imread("/root/test_dir/two_pedestrian.jpeg",CV_LOAD_IMAGE_COLOR);
     cv_image.encoding = "bgr8";
     //sensor_msgs::Image ros_image;
     //cv_image.toImageMsg(image);
@@ -104,7 +117,7 @@ void makeMenuMarker( std::string name )
 {
   InteractiveMarker menu_marker;
   menu_marker.header.frame_id = "base_link";
-  menu_marker.pose.position.y = 0.0; //-3.0 * marker_pos++;;
+  menu_marker.pose.position.y = 5.0 ; //0.0; //-3.0 * marker_pos++;;
   menu_marker.scale = 1;
   menu_marker.name = name;
 
@@ -153,13 +166,13 @@ int main(int argc, char** argv)
 
   ros::NodeHandle n;
 
-  ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
-  // image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
+  //ros::Publisher image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
+   image_pub = n.advertise<sensor_msgs::Image>("visualization_image",1);
   
 
   for(int i=0;i<found_elements;i++){
       doShow.push_back(true);
-      
+       //doShow.push_back(false);
   }
   bbox b1={305,305,533,701};
   bbox b2={804,317,1079,716};
@@ -185,7 +198,7 @@ int main(int argc, char** argv)
       {
         return 0;
       }
-      ROS_WARN_ONCE("Please create a subscriber to the image");
+      ROS_WARN_ONCE("Please create a subscriber to the image boo");
       sleep(1);
     }
    
